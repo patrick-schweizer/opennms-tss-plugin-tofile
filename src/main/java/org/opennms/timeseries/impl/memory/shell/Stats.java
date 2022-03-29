@@ -35,16 +35,17 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.timeseries.impl.memory.InMemoryStorage;
+import org.opennms.timeseries.impl.memory.ToFileStorage;
 
 import com.codahale.metrics.ConsoleReporter;
 
-@Command(scope = "opennms-tss-inmemory", name = "stats", description = "Display statistics.")
+//@Command(scope = "opennms-tss-inmemory", name = "stats", description = "Display statistics.")
+@Command(scope = "opennms-tss-tofile", name = "stats", description = "Display statistics.")
 @Service
 public class Stats implements Action {
 
     @Reference
-    private InMemoryStorage tss;
+    private ToFileStorage tss;
 
     @Override
     public Object execute() {

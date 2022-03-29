@@ -28,12 +28,8 @@
 
 package org.opennms.timeseries.impl.memory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -51,29 +47,77 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * Simulates a time series storage in memory (Guava cache). The implementation is super simple and not very efficient.
+ * Simulates a time series storage in a File. The implementation is super simple and not very efficient.
  * For testing and evaluating purposes only, not for production.
  */
-public class InMemoryStorage implements TimeSeriesStorage {
+public class ToFileStorage implements TimeSeriesStorage{
 
     private final ConcurrentMap<Metric, Collection<Sample>> data;
 
     private final MetricRegistry metrics = new MetricRegistry();
     private final Meter samplesWritten = metrics.meter("samplesWritten");
 
-    public InMemoryStorage () {
+   /**  not used due to access rights concerning this folder
+    * private  String homedirectory = System.getProperty("user.home");
+    private String fileseparator = System.getProperty("file.separator");
+    private File outputFileFolder= new File(homedirectory+fileseparator ,"fileoutput.txt");
+    **/
+
+   private File outputFileFolder= new File("C:\\output\\output.txt");
+
+
+
+    public ToFileStorage() {
         data = new ConcurrentHashMap<>();
     }
 
+
     @Override
     public void store(final List<Sample> samples) {
+
         Objects.requireNonNull(samples);
-        for(Sample sample : samples) {
-            Collection<Sample> timeseries = data.computeIfAbsent(sample.getMetric(), k -> new ConcurrentLinkedQueue<>());
-            timeseries.add(sample);
-        }
-        samplesWritten.mark(samples.size());
+            for (Sample sample : samples) {
+                Collection<Sample> timeseries = data.computeIfAbsent(sample.getMetric(), k -> new ConcurrentLinkedQueue<>());
+                timeseries.add(sample);
+            }
+
+writeIntoFile(samples);
+        //  samplesWritten.mark(samples.size());
     }
+
+    public void writeIntoFile(List<Sample> samples)  {
+       checkFolderPath();
+        FileOutputStream fileoutputstream =  null;
+
+            try {
+                fileoutputstream = new FileOutputStream(outputFileFolder);
+                for (Sample sample : samples) {
+                    String samplestring = sample.getMetric() + " " + sample.getValue() + " " + sample.getTime();
+                    fileoutputstream.write(samplestring.getBytes());
+                    fileoutputstream.write(10);
+                    samplestring = null;
+                }
+
+                } catch(IOException e){
+                    e.printStackTrace();
+                }finally {
+                try {
+                    fileoutputstream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+    }
+
+    public void checkFolderPath() {
+        if (!outputFileFolder.exists()) {
+            this.outputFileFolder.mkdirs();
+
+        }
+}
 
     @Override
     public List<Metric> findMetrics(Collection<TagMatcher> tagMatchers) {

@@ -31,10 +31,10 @@ package org.opennms.timeseries.impl.memory;
 import org.opennms.integration.api.v1.timeseries.AbstractStorageIntegrationTest;
 import org.opennms.integration.api.v1.timeseries.TimeSeriesStorage;
 
-public class InMemoryStorageTest extends AbstractStorageIntegrationTest {
+public class ToFileStorageTest extends AbstractStorageIntegrationTest {
 
     @Override
     protected TimeSeriesStorage createStorage() {
-        return new InMemoryStorage();
+        return new ToFileStorage();
     }
 }
